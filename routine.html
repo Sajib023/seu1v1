@@ -1,0 +1,910 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Routine Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card h2 {
+            color: #1e293b;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #1e293b;
+            font-size: 16px;
+            transition: border-color 0.2s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .day-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .day-checkbox:hover {
+            background: #e2e8f0;
+        }
+
+        .day-checkbox.selected {
+            background: #dbeafe;
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+
+        .day-checkbox input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #3b82f6;
+            color: #3b82f6;
+        }
+
+        .btn-outline:hover {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .course-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .course-item h3 {
+            margin-bottom: 15px;
+            color: #1e293b;
+            font-size: 1.2em;
+        }
+
+        .remove-course {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .remove-course:hover {
+            background: #dc2626;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .actions .btn {
+            flex: 1;
+        }
+
+        .add-course-btn {
+            width: 100%;
+            margin-bottom: 20px;
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .add-course-btn:hover {
+            background: #059669;
+        }
+
+        .test-data-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s ease;
+        }
+
+        .test-data-btn:hover {
+            background: #d97706;
+        }
+
+        /* Routine Table */
+        .routine-container {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .routine-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .routine-table th {
+            background: #1e293b;
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .routine-table td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: center;
+            vertical-align: middle;
+            height: 70px;
+        }
+
+        .routine-table .day-header {
+            background: #374151;
+            color: white;
+            font-weight: 600;
+            min-width: 120px;
+        }
+
+        .class-cell {
+            border-radius: 6px;
+            padding: 8px;
+            height: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #1e293b;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .class-eng { background: #dcfce7; border: 1px solid #16a34a; }
+        .class-mat { background: #fef3c7; border: 1px solid #d97706; }
+        .class-cse { background: #dbeafe; border: 1px solid #3b82f6; }
+        .class-phy { background: #fecaca; border: 1px solid #ef4444; }
+        .class-default { background: #f1f5f9; border: 1px solid #64748b; }
+        .class-conflict { background: #fee2e2; border: 1px solid #ef4444; }
+
+        .room-number {
+            font-size: 0.75em;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #374151;
+        }
+
+        .conflict-message {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .time-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .days-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .routine-table {
+                font-size: 12px;
+            }
+            
+            .routine-table th,
+            .routine-table td {
+                padding: 8px 4px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Class Routine Generator</h1>
+            <p>Create and manage your personalized class schedule</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Course Input Section -->
+            <div class="card">
+                <h2>Course Details</h2>
+                <div class="input-group">
+                    <label for="courseCount">Number of Courses:</label>
+                    <input type="number" id="courseCount" min="1" max="20" value="4" placeholder="Enter number of courses">
+                </div>
+                <button class="test-data-btn" onclick="loadTestData()">Load Sample Data</button>
+                <button class="add-course-btn" onclick="addCourse()">+ Add New Course</button>
+                <div id="coursesContainer"></div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="saveRoutine()">Save Routine</button>
+                    <button class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Routine Display Section -->
+        <div class="routine-container">
+            <div class="card">
+                <h2>Generated Class Routine</h2>
+                <div id="routineContainer">
+                    <div class="empty-state">
+                        <h3>No routine generated yet</h3>
+                        <p>Add your courses above and click "Save Routine" to generate and save your schedule</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="card">
+            <h2>Schedule Statistics</h2>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalCourses">0</div>
+                    <div class="stat-label">Total Courses</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalHours">0</div>
+                    <div class="stat-label">Weekly Hours</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="busyDays">0</div>
+                    <div class="stat-label">Active Days</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let courses = [];
+        let courseCounter = 0;
+        const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            
+            // Auto-generate routine when course count changes
+            document.getElementById('courseCount').addEventListener('change', function() {
+                const count = parseInt(this.value) || 0;
+                if (count > courses.length) {
+                    for (let i = courses.length; i < count; i++) {
+                        addCourse();
+                    }
+                } else if (count < courses.length) {
+                    while (courses.length > count) {
+                        removeCourse(courses[courses.length - 1].id);
+                    }
+                }
+                updateStats();
+            });
+        });
+
+        function addCourse() {
+            courseCounter++;
+            const course = {
+                id: courseCounter,
+                code: '',
+                days: [],
+                startTime: '',
+                endTime: '',
+                room: ''
+            };
+            courses.push(course);
+            renderCourseInput(course);
+            updateStats();
+        }
+
+        function renderCourseInput(course) {
+            const container = document.getElementById('coursesContainer');
+            const courseDiv = document.createElement('div');
+            courseDiv.className = 'course-item';
+            courseDiv.id = `course-${course.id}`;
+            
+            courseDiv.innerHTML = `
+                <button class="remove-course" onclick="removeCourse(${course.id})">×</button>
+                <h3>Course ${course.id}</h3>
+                
+                <div class="input-group">
+                    <label>Course Code:</label>
+                    <input type="text" placeholder="e.g., CSE161" value="${course.code}" onchange="updateCourse(${course.id}, 'code', this.value)">
+                </div>
+                
+                <div class="input-group">
+                    <label>Select Days:</label>
+                    <div class="days-grid">
+                        ${daysOfWeek.map(day => `
+                            <div class="day-checkbox ${course.days.includes(day) ? 'selected' : ''}" onclick="toggleDay(${course.id}, '${day}', this)">
+                                <input type="checkbox" id="day-${course.id}-${day}" ${course.days.includes(day) ? 'checked' : ''}>
+                                <label for="day-${course.id}-${day}">${day}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="time-grid">
+                    <div class="input-group">
+                        <label>Start Time:</label>
+                        <input type="time" value="${course.startTime}" onchange="updateCourse(${course.id}, 'startTime', this.value)">
+                    </div>
+                    <div class="input-group">
+                        <label>End Time:</label>
+                        <input type="time" value="${course.endTime}" onchange="updateCourse(${course.id}, 'endTime', this.value)">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Room Number:</label>
+                    <input type="text" placeholder="e.g., 101" value="${course.room}" onchange="updateCourse(${course.id}, 'room', this.value)">
+                </div>
+            `;
+            
+            container.appendChild(courseDiv);
+        }
+
+        function removeCourse(courseId) {
+            courses = courses.filter(c => c.id !== courseId);
+            const element = document.getElementById(`course-${courseId}`);
+            if (element) {
+                element.remove();
+            }
+            updateStats();
+            generateRoutine();
+        }
+
+        function updateCourse(courseId, field, value) {
+            const course = courses.find(c => c.id === courseId);
+            if (course) {
+                course[field] = value;
+                updateStats();
+                generateRoutine();
+            }
+        }
+
+        function toggleDay(courseId, day, element) {
+            const course = courses.find(c => c.id === courseId);
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            
+            if (course.days.includes(day)) {
+                course.days = course.days.filter(d => d !== day);
+                checkbox.checked = false;
+                element.classList.remove('selected');
+            } else {
+                course.days.push(day);
+                checkbox.checked = true;
+                element.classList.add('selected');
+            }
+            
+            updateStats();
+            generateRoutine();
+        }
+
+        function checkConflicts(courses) {
+            const conflicts = [];
+            const validCourses = courses.filter(c => c.code && c.startTime && c.endTime && c.days.length > 0);
+            
+            for (let i = 0; i < validCourses.length; i++) {
+                const course1 = validCourses[i];
+                const start1 = new Date(`2000-01-01T${course1.startTime}`);
+                const end1 = new Date(`2000-01-01T${course1.endTime}`);
+                
+                for (let j = i + 1; j < validCourses.length; j++) {
+                    const course2 = validCourses[j];
+                    const start2 = new Date(`2000-01-01T${course2.startTime}`);
+                    const end2 = new Date(`2000-01-01T${course2.endTime}`);
+                    
+                    // Check for common days
+                    const commonDays = course1.days.filter(day => course2.days.includes(day));
+                    
+                    if (commonDays.length > 0) {
+                        // Check for overlapping times
+                        if (start1 < end2 && start2 < end1) {
+                            conflicts.push({
+                                course1: course1.code,
+                                course2: course2.code,
+                                days: commonDays
+                            });
+                        }
+                    }
+                }
+            }
+            
+            return conflicts;
+        }
+
+        function generateRoutine() {
+            const validCourses = courses.filter(c => c.code && c.startTime && c.endTime && c.days.length > 0);
+            
+            if (validCourses.length === 0) {
+                document.getElementById('routineContainer').innerHTML = `
+                    <div class="empty-state">
+                        <h3>No valid courses found</h3>
+                        <p>Please add course details to generate your routine</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Check for conflicts
+            const conflicts = checkConflicts(courses);
+            let conflictMessage = '';
+            
+            if (conflicts.length > 0) {
+                conflictMessage = `
+                    <div class="conflict-message">
+                        <strong>Schedule Conflicts Detected!</strong><br>
+                        ${conflicts.map(c => 
+                            `${c.course1} and ${c.course2} conflict on ${c.days.join(', ')}`
+                        ).join('<br>')}
+                    </div>
+                `;
+            }
+
+            // Get unique time slots
+            const timeSlots = [];
+            const timeSlotMap = new Map();
+            
+            validCourses.forEach(course => {
+                const slotKey = `${course.startTime}-${course.endTime}`;
+                const slotLabel = `${formatTime(course.startTime)} - ${formatTime(course.endTime)}`;
+                if (!timeSlotMap.has(slotKey)) {
+                    timeSlotMap.set(slotKey, slotLabel);
+                    timeSlots.push({ 
+                        key: slotKey, 
+                        label: slotLabel, 
+                        start: course.startTime, 
+                        end: course.endTime 
+                    });
+                }
+            });
+            
+            // Sort time slots
+            timeSlots.sort((a, b) => a.start.localeCompare(b.start));
+            
+            // Get days with classes
+            const daysWithClasses = daysOfWeek.filter(day => {
+                return validCourses.some(course => course.days.includes(day));
+            });
+            
+            // Generate table
+            let tableHTML = `
+                ${conflictMessage}
+                <table class="routine-table">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            ${timeSlots.map(slot => `<th>${slot.label}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${daysWithClasses.map(day => `
+                            <tr>
+                                <td class="day-header">${day}</td>
+                                ${timeSlots.map(slot => {
+                                    const slotCourses = validCourses.filter(c => 
+                                        c.days.includes(day) && 
+                                        c.startTime === slot.start && 
+                                        c.endTime === slot.end
+                                    );
+                                    
+                                    if (slotCourses.length > 0) {
+                                        const classType = slotCourses.length > 1 ? 'class-conflict' : getClassType(slotCourses[0].code);
+                                        const content = slotCourses.length > 1 
+                                            ? slotCourses.map(c => `${c.code}${c.room ? `<div class="room-number">[${c.room}]</div>` : ''}`).join('<br>')
+                                            : `${slotCourses[0].code}${slotCourses[0].room ? `<div class="room-number">[${slotCourses[0].room}]</div>` : ''}`;
+                                        return `
+                                            <td>
+                                                <div class="class-cell ${classType}">
+                                                    ${content}
+                                                </div>
+                                            </td>
+                                        `;
+                                    } else {
+                                        return '<td></td>';
+                                    }
+                                }).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('routineContainer').innerHTML = tableHTML;
+        }
+
+        function saveRoutine() {
+            generateRoutine();
+            const routineContainer = document.getElementById('routineContainer');
+            const routineTable = routineContainer.querySelector('.routine-table');
+            
+            if (!routineTable) {
+                alert('No routine generated to save as image');
+                return;
+            }
+            
+            html2canvas(routineTable, {
+                backgroundColor: '#ffffff',
+                scale: 2 // Increase resolution
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'class_routine.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(error => {
+                console.error('Error saving image:', error);
+                alert('Failed to save image. Please try again.');
+            });
+        }
+
+        function getClassType(courseCode) {
+            const code = courseCode.toUpperCase();
+            if (code.includes('ENG')) return 'class-eng';
+            if (code.includes('MAT')) return 'class-mat';
+            if (code.includes('CSE')) return 'class-cse';
+            if (code.includes('PHY')) return 'class-phy';
+            return 'class-default';
+        }
+
+        function formatTime(time) {
+            if (!time) return '';
+            return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        function updateStats() {
+            const validCourses = courses.filter(c => c.code && c.startTime && c.endTime && c.days.length > 0);
+            
+            document.getElementById('totalCourses').textContent = validCourses.length;
+            
+            // Calculate total weekly hours
+            let totalHours = 0;
+            validCourses.forEach(course => {
+                if (course.startTime && course.endTime) {
+                    const start = new Date(`2000-01-01T${course.startTime}`);
+                    const end = new Date(`2000-01-01T${course.endTime}`);
+                    const duration = (end - start) / (1000 * 60 * 60); // hours
+                    totalHours += duration * course.days.length;
+                }
+            });
+            document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+            
+            // Calculate busy days
+            const busyDays = new Set();
+            validCourses.forEach(course => {
+                course.days.forEach(day => busyDays.add(day));
+            });
+            document.getElementById('busyDays').textContent = busyDays.size;
+        }
+
+        function clearAll() {
+            courses = [];
+            courseCounter = 0;
+            document.getElementById('coursesContainer').innerHTML = '';
+            document.getElementById('courseCount').value = '0';
+            document.getElementById('routineContainer').innerHTML = `
+                <div class="empty-state">
+                    <h3>No routine generated yet</h3>
+                    <p>Add your courses above and click "Save Routine" to generate and save your schedule</p>
+                </div>
+            `;
+            updateStats();
+        }
+
+        function loadTestData() {
+            clearAll();
+            document.getElementById('courseCount').value = '4';
+            
+            const testCourses = [
+                {
+                    id: 1,
+                    code: 'ENG105',
+                    days: ['Sunday', 'Tuesday'],
+                    startTime: '10:00',
+                    endTime: '11:20',
+                    room: '526'
+                },
+                {
+                    id: 2,
+                    code: 'MAT141.5',
+                    days: ['Sunday', 'Tuesday'],
+                    startTime: '13:30',
+                    endTime: '14:50',
+                    room: '326'
+                },
+                {
+                    id: 3,
+                    code: 'CSE481',
+                    days: ['Monday', 'Wednesday'],
+                    startTime: '10:00',
+                    endTime: '11:20',
+                    room: '272'
+                },
+                {
+                    id: 4,
+                    code: 'PHY181',
+                    days: ['Monday', 'Wednesday'],
+                    startTime: '11:20',
+                    endTime: '12:50',
+                    room: '882'
+                }
+            ];
+            
+            courses = testCourses;
+            courseCounter = 4;
+            
+            courses.forEach(course => {
+                renderCourseInput(course);
+            });
+            
+            updateStats();
+            generateRoutine();
+        }
+    </script>
+</body>
+</html>

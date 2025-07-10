@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEU Campusmate - Student Companion Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Custom CSS for elements that need more styling */
+        .gradient-bg {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .typewriter {
+            overflow: hidden;
+            border-right: .15em solid #4f46e5;
+            white-space: nowrap;
+            margin: 0 auto;
+            letter-spacing: .15em;
+            animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+        }
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #4f46e5; }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-gray-800">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-graduation-cap text-indigo-600 text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-indigo-600">SEU Campusmate</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#tools" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">Tools</a>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="menu-btn" class="text-gray-500 hover:text-indigo-600 focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white pb-3 px-4">
+            <a href="#tools" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600">Tools</a>
+            <a href="#" class="block w-full text-center bg-indigo-600 text-white px-4 py-2 rounded-md text-base font-medium hover:bg-indigo-700 mt-2">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-6">Your Ultimate <span class="typewriter">SEU Companion</span></h1>
+                    <p class="text-xl mb-8 opacity-90">Empowering SEU students with tools, resources, and information to make campus life easier and more productive.</p>
+                    <div class="flex">
+                        <a href="#tools" class="bg-white text-indigo-600 px-6 py-3 rounded-lg text-lg font-semibold text-center hover:bg-gray-100 transition duration-300">Explore Tools</a>
+                    </div>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <img src="https://illustrations.popsy.co/amber/digital-nomad.svg" alt="Student studying" class="w-full max-w-md floating">
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Tools Section -->
+    <section id="tools" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Our Powerful Tools</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Everything you need to navigate university life successfully</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Tool Card 1 -->
+                <div class="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300">
+                    <div class="h-48 bg-indigo-100 flex items-center justify-center">
+                        <i class="fas fa-user-tie text-indigo-600 text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">Faculty Information</h3>
+                        <p class="text-gray-600 mb-4">Comprehensive profiles of SEU faculty members including their qualifications, research areas, and contact information.</p>
+                        <a href="#" class="text-indigo-600 font-medium flex items-center">Explore <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Tool Card 2 -->
+                <div class="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300">
+                    <div class="h-48 bg-indigo-100 flex items-center justify-center">
+                        <i class="fas fa-star-half-alt text-indigo-600 text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">Faculty Reviews</h3>
+                        <p class="text-gray-600 mb-4">Anonymous, honest reviews from students about teaching styles, grading patterns, and classroom experiences.</p>
+                        <a href="#" class="text-indigo-600 font-medium flex items-center">Read Reviews <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Tool Card 3 -->
+                <div class="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300">
+                    <div class="h-48 bg-indigo-100 flex items-center justify-center">
+                        <i class="fas fa-calendar-alt text-indigo-600 text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">Class Routine Generator</h3>
+                        <p class="text-gray-600 mb-4">Create optimized class schedules based on your preferred timings and avoid conflicts automatically.</p>
+                        <a href="routine.html" class="text-indigo-600 font-medium flex items-center">Generate Routine <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Tool Card 4 -->
+                <div class="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300">
+                    <div class="h-48 bg-indigo-100 flex items-center justify-center">
+                        <i class="fas fa-percentage text-indigo-600 text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">CGPA Calculator</h3>
+                        <p class="text-gray-600 mb-4">Calculate your current and projected CGPA with different grade scenarios to plan your academic strategy.</p>
+                        <a href="#" class="text-indigo-600 font-medium flex items-center">Calculate Now <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Tool Card 5 -->
+                <div class="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300">
+                    <div class="h-48 bg-indigo-100 flex items-center justify-center">
+                        <i class="fas fa-file-invoice-dollar text-indigo-600 text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">Waiver Information</h3>
+                        <p class="text-gray-600 mb-4">Detailed guides on tuition fee waivers, scholarship opportunities, and application procedures at SEU.</p>
+                        <a href="#" class="text-indigo-600 font-medium flex items-center">Learn More <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Tool Card 6 -->
+                <div class="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300">
+                    <div class="h-48 bg-indigo-100 flex items-center justify-center">
+                        <i class="fas fa-file-alt text-indigo-600 text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">Assignment Cover Generator</h3>
+                        <p class="text-gray-600 mb-4">Create professional assignment cover pages in seconds with all required SEU formatting automatically applied.</p>
+                        <a href="coverpage.html" class="text-indigo-600 font-medium flex items-center">Generate Cover <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEUbot Section --> 
+<section class="py-20 gradient-bg text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col md:flex-row items-center">
+      <div class="md:w-1/2 mb-10 md:mb-0">
+        <h2 class="text-3xl font-bold mb-6">Meet SEUbot</h2>
+        <p class="text-xl mb-8 opacity-90">
+          Your 24/7 virtual assistant for all things SEU. Get instant answers to your questions about courses, procedures, deadlines, and more.
+        </p>
+        <div class="bg-white bg-opacity-10 p-6 rounded-lg mb-6">
+          <div class="flex items-start mb-4">
+            <div class="flex-shrink-0 bg-indigo-500 rounded-full p-2 mr-3">
+              <i class="fas fa-robot text-white"></i>
+            </div>
+            <div class="bg-white bg-opacity-20 p-3 rounded-lg">
+              <p>
+                Hi! I'm SEUbot. Ask me anything about Southeast University - courses, registration, exams, or campus facilities.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start">
+            <div class="flex-shrink-0 bg-white rounded-full p-2 mr-3">
+              <i class="fas fa-user text-indigo-600"></i>
+            </div>
+            <div class="bg-white bg-opacity-20 p-3 rounded-lg w-full">
+              <input
+                id="seubot-input"
+                type="text"
+                placeholder="Type your question..."
+                class="bg-transparent border-b border-white w-full text-white placeholder-white focus:outline-none"
+              >
+            </div>
+          </div>
+          <!-- Response output -->
+          <div id="seubot-response" class="mt-4 p-3 bg-white bg-opacity-20 rounded-lg"></div>
+        </div>
+        <a
+          href="#"
+          id="seubot-send"
+          class="inline-block bg-white text-indigo-600 px-6 py-3 rounded-lg text-lg font-semibold hover:bg-gray-100 transition duration-300"
+        >
+          Chat with SEUbot
+        </a>
+      </div>
+      <div class="md:w-1/2 flex justify-center">
+        <img src="https://freesvg.org/img/1538298822.png" alt="AI Chatbot" class="w-full max-w-md">
+      </div>
+    </div>
+  </div>
+</section>
+
+
+    <!-- Important Links -->
+    <section class="py-16 bg-indigo-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Important SEU Links</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <a href="https://new.seu.edu.bd" class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition duration-300 flex flex-col items-center">
+                    <div class="bg-indigo-100 p-3 rounded-full mb-3">
+                        <i class="fas fa-university text-indigo-600 text-xl"></i>
+                    </div>
+                    <span class="font-medium text-center">SEU Official Website</span>
+                </a>
+                <a href="https://ums.seu.edu.bd" class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition duration-300 flex flex-col items-center">
+                    <div class="bg-indigo-100 p-3 rounded-full mb-3">
+                        <i class="fas fa-book text-indigo-600 text-xl"></i>
+                    </div>
+                    <span class="font-medium text-center">SEU UMS</span>
+                </a>
+                <a href="#" class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition duration-300 flex flex-col items-center">
+                    <div class="bg-indigo-100 p-3 rounded-full mb-3">
+                        <i class="fas fa-calendar-check text-indigo-600 text-xl"></i>
+                    </div>
+                    <span class="font-medium text-center">Academic Calendar</span>
+                </a>
+                <a href="#" class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition duration-300 flex flex-col items-center">
+                    <div class="bg-indigo-100 p-3 rounded-full mb-3">
+                        <i class="fas fa-graduation-cap text-indigo-600 text-xl"></i>
+                    </div>
+                    <span class="font-medium text-center">Exam Schedule</span>
+                </a>
+                <a href="#" class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition duration-300 flex flex-col items-center">
+                    <div class="bg-indigo-100 p-3 rounded-full mb-3">
+                        <i class="fas fa-file-alt text-indigo-600 text-xl"></i>
+                    </div>
+                    <span class="font-medium text-center">Course Catalog</span>
+                </a>
+                <a href="https://new.seu.edu.bd/tuitions-fees" class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition duration-300 flex flex-col items-center">
+                    <div class="bg-indigo-100 p-3 rounded-full mb-3">
+                        <i class="fas fa-hand-holding-usd text-indigo-600 text-xl"></i>
+                    </div>
+                    <span class="font-medium text-center">Tuition Fees</span>
+                </a>
+                <a href="#" class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition duration-300 flex flex-col items-center">
+                    <div class="bg-indigo-100 p-3 rounded-full mb-3">
+                        <i class="fas fa-bus text-indigo-600 text-xl"></i>
+                    </div>
+                    <span class="font-medium text-center">Transport Schedule</span>
+                </a>
+                <a href="#" class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition duration-300 flex flex-col items-center">
+                    <div class="bg-indigo-100 p-3 rounded-full mb-3">
+                        <i class="fas fa-question-circle text-indigo-600 text-xl"></i>
+                    </div>
+                    <span class="font-medium text-center">FAQs</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">SEU Campusmate</h3>
+                    <p class="text-gray-400">The ultimate companion for Southeast University students, created by students.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Home</a></li>
+                        <li><a href="#tools" class="text-gray-400 hover:text-white">Tools</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Tools</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Faculty Info</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Faculty Reviews</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Routine Generator</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">CGPA Calculator</a></li>
+                    </ul>
+                </div>
+                <div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2023 SEU Campusmate. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-white">FAQ</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+     <script>
+    const input = document.getElementById('seubot-input');
+    const send = document.getElementById('seubot-send');
+    const responseDiv = document.getElementById('seubot-response');
+
+    send.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
+
+      responseDiv.textContent = "Thinking...";
+
+      const res = await fetch('/.netlify/functions/seubot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userMessage })
+      });
+
+      const data = await res.json();
+      responseDiv.textContent = data.reply || "No response from SEUbot.";
+      input.value = '';
+    });
+  </script>
+
+    <script>
+        // Mobile menu toggle
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    if(!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
+            });
+        });
+
+        // Animation for the typewriter effect
+        const typewriterElement = document.querySelector('.typewriter');
+        const phrases = ["SEU Companion", "Academic Helper", "Student Resource", "Campus Guide"];
+        let currentPhrase = 0;
+        let isDeleting = false;
+        let text = '';
+        let typingSpeed = 100;
+        let pauseBetweenPhrases = 2000;
+
+        function typeWriter() {
+            const fullPhrase = phrases[currentPhrase];
+            
+            if (isDeleting) {
+                text = fullPhrase.substring(0, text.length - 1);
+                typingSpeed = 50;
+            } else {
+                text = fullPhrase.substring(0, text.length + 1);
+                typingSpeed = 100;
+            }
+            
+            typewriterElement.textContent = text;
+            
+            if (!isDeleting && text === fullPhrase) {
+                typingSpeed = pauseBetweenPhrases;
+                isDeleting = true;
+            } else if (isDeleting && text === '') {
+                isDeleting = false;
+                currentPhrase = (currentPhrase + 1) % phrases.length;
+                typingSpeed = 500;
+            }
+            
+            setTimeout(typeWriter, typingSpeed);
+        }
+
+        // Start the typewriter effect
+        setTimeout(typeWriter, 1000);
+    </script>
+</body>
+</html>
