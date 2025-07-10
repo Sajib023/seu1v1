@@ -1,22 +1,22 @@
 const fetch = require("node-fetch");
 
-// SHORT & SAFE PROMPT — NO BACKTICKS INSIDE!
-const systemPrompt = `You are SEUbot, the official virtual assistant for Southeast University, Dhaka, Bangladesh.
-You answer questions about tuition fees, payment breakdowns, schedules, admission fees, required documents, and payment modes.
+// ✅ SHORT SYSTEM PROMPT, all inside one pair of backticks!
+const systemPrompt = `You are SEUbot, the virtual assistant for Southeast University, Dhaka.
+You help students with tuition fees, payment breakdowns, schedules, admission fees, required documents, and payment modes.
 
 Schools:
 1) SSE: BSc in CSE ~Tk 777,500, EEE ~Tk 598,500, B.Pharm ~Tk 977,000.
-2) SBS: BBA ~Tk 658,650, MBA Regular ~Tk 259,500, EMBA ~Tk 198,000.
-3) SASS: LLB (Hons) ~Tk 729,950, BA in English ~Tk 509,300, MA in Bangla ~Tk 50,000.
+2) SBS: BBA ~Tk 658,650, MBA ~Tk 259,500, EMBA ~Tk 198,000.
+3) SASS: LLB ~Tk 729,950, BA in English ~Tk 509,300, MA in Bangla ~Tk 50,000.
 
-Payment: 1st semester: 20% at admission, 20% at registration, 30% mid-term, 30% finals.
-Admission Fee: Tk 18,100 total.
+Payment: 1st semester → 20% admission, 20% registration, 30% mid-term, 30% final.
+Admission Fee: Tk 18,100 total (admission, library, form, insurance).
 
-Documents: admission form, academic papers, 4 passport photos, student & guardian NID, job experience (EMBA), for foreign students: passport, clearance, NOC.
+Required docs: admission form, certificates, 4 passport photos, student/guardian NID, job experience (for EMBA), foreign students: passport, police clearance, NOC.
 
-Payment: bank booth Sun–Thu 10AM–3:30PM or online (Bkash, Rocket, Nagad, Upay, Visa/Mastercard) 9AM–8PM daily.
+Payments: bank booth Sun–Thu 10AM–3:30PM, online Bkash/Rocket/Nagad/Upay/Visa/MasterCard 9AM–8PM daily.
 
-Use only this info to answer clearly and concisely.
+Always answer clearly and only use this info.
 `;
 
 exports.handler = async function (event, context) {
@@ -53,4 +53,34 @@ exports.handler = async function (event, context) {
 
     const data = await response.json();
 
-    console
+    console.log("Groq response status:", response.status);
+    console.log("Groq response data:", data);
+
+    if (!response.ok) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          error: "Groq API error",
+          status: response.status,
+          details: data,
+        }),
+      };
+    }
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        reply: data.choices?.[0]?.message?.content || "No reply from Groq.",
+      }),
+    };
+  } catch (error) {
+    console.error("Function error:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: "Internal Server Error",
+        message: error.message,
+      }),
+    };
+  }
+};
