@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEU Faculty Information System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">SEU Faculty Directory</h1>
+            <p class="text-gray-600 mt-2">Search and explore faculty information</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Search Section -->
+            <div class="lg:w-3/4">
+                <!-- Search Box -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" id="searchInput" 
+                               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" 
+                               placeholder="Search by name, initial, or course...">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <span id="resultCount" class="text-sm text-gray-500">Loading faculty...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Faculty Table -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <div class="flex items-center">
+                                            Name
+                                            <button id="sortName" class="ml-1 focus:outline-none">
+                                                <i class="fas fa-sort text-gray-400 hover:text-gray-600"></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Initial
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Courses
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Profile
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="facultyTableBody" class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">Loading faculty data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-sm text-gray-700">
+                                    Showing <span id="showingFrom">1</span> to <span id="showingTo">10</span> of <span id="totalItems">...</span> results
+                                </p>
+                            </div>
+                            <div>
+                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                    <button id="prevPage" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Previous</span>
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <div id="pageNumbers" class="flex">
+                                        <!-- Page numbers will be inserted here -->
+                                    </div>
+                                    <button id="nextPage" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Next</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Faculty Quick View -->
+            <div class="lg:w-1/4">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                    <h2 class="text-xl font-semibold mb-4">Faculty Quick View</h2>
+                    <div id="facultyDetails" class="space-y-4">
+                        <div class="text-center text-gray-500">
+                            <i class="fas fa-user-graduate text-4xl mb-2"></i>
+                            <p>Select a faculty member to view details</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Faculty courses data
+        const facultyCourses = {
+            "MNHA": ["ACT141"],
+            "RSP": ["ACT141"],
+            "MFT": ["ACT141"],
+            "PAA": ["ACT141"],
+            "ASNA": ["ACT141"],
+            "MAC": ["ACT141"],
+            "KSR": ["ACT141"],
+            "JNS": ["ACT141"],
+            "FUZ":["CSE161", "CSE162", "CSE181", "CSE263", "CSE264", "CSE141"],
+            "NALE": ["CSE141"],
+            "MRAI": ["CSE141"],
+            "SHAP": ["CSE141"],
+            "MKP": ["MAT161"],
+            "KMU": ["CSE141", "CSE181"],
+            "SSSV": ["CSE141"],
+            "TMD": ["CSE161", "CSE162", "CSE181", "CSE261", "CSE381", "CSE141"],
+            "YMA": ["CSE161", "CSE162", "CSE281", "CSE141", "CSE241", "CSE242", "CSE241", "CSE242"],
+            "MBH": ["CSE141", "SOC341"],
+            "DMHN": ["CSE141"],
+            "MAQ": ["CSE161", "CSE162"],
+            "SM": ["CSE161", "CSE162", "CSE261", "CSE241", "CSE181", "MAT161", "CSE349", "STA281"],
+            "FBH": ["CSE161", "CSE162", "CSE281", "CSE282"],
+            "NI": ["CSE161", "CSE162"],
+            "FAZA": ["CSE181", "CSE281", "CSE282"],
+            "SW": ["CSE181"],
+            "SHSH": ["CSE181"],
+            "RKM": ["CSE181"],
+            "MHB": ["CSE383", "CSE345", "CSE465", "CSE181", "CSE161", "CSE241", "CSE141"],
+            "AMH": ["CSE181"],
+            "TAJO": ["CSE181", "CSE263", "CSE264"],
+            "JM": ["CSE263", "CSE264"],
+            "MHZ": ["CSE263"],
+            "JHT": ["CSE263", "CSE264","EEE181", "EEE241", "EEE242", "EEE182"],
+            "NOOR": ["CSE281", "CSE282"],
+            "MOHO": ["CSE281", "CSE282"],
+            "ZAHA": ["CSE281", "CSE282"],
+            "MAKR": ["CSE281", "CSE282", "STA281"],
+            "NH": ["CSE281", "CSE282"],
+            "MMSI": ["CSE281", "CSE282"],
+            "MDSR": ["CSE475"],
+            "SAZ": ["ECO461"],
+            "MSAS": ["ECO461"],
+            "TAAK": ["ECO461"],
+            "FOA": ["EEE181", "EEE182"],
+            "ALA": ["EEE181", "EEE182"],
+            "MAMA": ["EEE181", "EEE182"],
+            "SS": ["EEE181", "EEE182"],
+            "ADMR": ["EEE181", "EEE182"],
+            "MDHB": ["EEE181", "EEE182", "EEE241", "ETE399", "CSE343", "PHY161"],
+            "KRH": ["EEE181", "EEE182", "EEE241", "EEE242", "ETE281", "ETE282"],
+            "YAM": ["EEE181"],
+            "SAAN": ["EEE181", "EEE182"],
+            "SHMS": ["ENG101"],
+            "TDS": ["ENG101", "ENG103"],
+            "SAIS": ["ENG101", "ENG102", "ENG103"],
+            "DAFN": ["ENG101", "ENG103"],
+            "RCL": ["ENG101", "ENG102"],
+            "STM": ["ENG101"],
+            "MSW": ["ENG101"],
+            "MSB": ["MAT141", "MAT161", "MAT241", "MAT261", "STA281"],
+            "IJ": ["PHY161,PHY182,PHY181"],
+            "MSS": ["ENG101"],
+            "TNI": ["ENG102"],
+            "JET": ["ENG102"],
+            "TAH": ["ENG102", "ENG103"],
+            "IFA": ["ENG102"],
+            "FAF": ["ENG103"],
+            "SHK": ["ENG103"],
+            "KHW": ["ENG103"],
+            "MIZ": ["ENG103"],
+            "APZ": ["ENG103"],
+            "MALN": ["MAT141", "MAT241"],
+            "MTK": ["MAT141", "MAT241"],
+            "GM": ["MAT141", "MAT161"],
+            "HASN": ["MAT141", "STA281"],
+            "SARN": ["MAT141"],
+            "SAMD": ["MAT261", "MAT241", "MAT161", "MAT141"],
+            "DTKD": ["MAT141"],
+            "MDAZ": ["MAT141"],
+            "SHR":["MAT141", "MAT161", "MAT261"],
+            "MAR": ["MAT161"],
+            "MDH": ["MAT241"],
+            "TBK": ["MGT281"],
+            "KFA": ["MGT281"],
+            "TNM": ["MGT281"],
+            "DMH": ["MGT281"],
+            "BMU": ["MGT281"],
+            "HDU": ["PHY161"],
+            "RS": ["PHY161"],
+            "AHR": ["PHY161"],
+            "EJS": ["PHY161", "PHY182"],
+            "MUKO": ["PHY161", "PHY182"],
+            "DMAZ": ["PHY181"],
+            "DHA": ["PHY181"],
+            "TNHR": ["PHY181", "PHY182"],
+            "TSR": ["PHY181"],
+            "DMMA": ["PHY181"],
+            "SAKR": ["SOC341"],
+            "DAKM": ["SOC341"],
+            "AKD": ["STA281"],
+            "MEI": ["STA281"],
+            "DRAD": ["STA281"],
+            "MAHB": ["STA281"],
+            "MDI": ["STA281"]
+        };
+
+        // Faculty data with manually verified initials
+        const facultyData = [
+            // From faculty_data.txt with manual initials
+            {name: "Dr. Md. Ayub Ali", initials: "DMAA", url: "https://seu.edu.bd/employee/profile/OTkwMDE5"},
+            {name: "Dr. Uzzal Kumar Acharjee", initials: "UKA", url: "https://seu.edu.bd/employee/profile/MDg4MDI4"},
+            {name: "Dr. Md. Elias", initials: "MEI", url: "https://seu.edu.bd/employee/profile/OTkwMDIw"},
+            {name: "Dr. Kh. Abdul Maleque", initials: "DKAM", url: "https://seu.edu.bd/employee/profile/OTkwMDI4"},
+            {name: "Dr. Mostak Ahmed", initials: "MA", url: "https://seu.edu.bd/employee/profile/MDAxOTMw"},
+            {name: "Dr. Shyamapada Biswas", initials: "SB", url: "https://seu.edu.bd/employee/profile/MDAxOTMz"},
+            {name: "Dr. Md. Masum Billah", initials: "DMMB", url: "https://seu.edu.bd/employee/profile/MDAxOTMx"},
+            {name: "Dr. Payer Ahmed", initials: "DPA", url: "https://seu.edu.bd/employee/profile/MDAxOTUw"},
+            {name: "Dr. Tanu Arefin", initials: "TA", url: "https://seu.edu.bd/employee/profile/OTkwMDI1"},
+            {name: "Mohammad Enamul Kabir", initials: "MEK", url: "https://seu.edu.bd/employee/profile/OTkwMDIz"},
+            {name: "Dr. Ashis Talukder", initials: "DRAT", url: "https://seu.edu.bd/employee/profile/NTIyMjI4"},
+            {name: "Md. Ashraful Alam", initials: "MAA", url: "https://seu.edu.bd/employee/profile/OTkwMDI0"},
+            {name: "Dr. Abdulla Al Momin", initials: "DAAM", url: "https://seu.edu.bd/employee/profile/MDAxOTQ1"},
+            {name: "Dr. Hasina Akther", initials: "DHA", url: "https://seu.edu.bd/employee/profile/MDAxOTM0"},
+            {name: "Dr. Abul Hasnat  Rubel", initials: "AHR", url: "https://seu.edu.bd/employee/profile/MDExMTE2"},
+            {name: "Dr. Kazi Ekramul Hoque", initials: "DKEH", url: "https://seu.edu.bd/employee/profile/MDAxOTM4"},
+            {name: "Md Moinul Hoque", initials: "MMH", url: "https://seu.edu.bd/employee/profile/MDAxOTQ5"},
+            {name: "Dr. Muhammad Sajjad Hossain", initials: "DMSH", url: "https://seu.edu.bd/employee/profile/MDAxOTM3"},
+            {name: "Md. Samiul Islam Sadek", initials: "MSIS", url: "https://seu.edu.bd/employee/profile/MDA4MDg3"},
+            {name: "Goutam Kumar Saha", initials: "GKS", url: "https://seu.edu.bd/employee/profile/MDk5MDEx"},
+            {name: "Bulbul Ahmed", initials: "BBA", url: "https://seu.edu.bd/employee/profile/MDk5MDA0"},
+            {name: "Mohammad Ashraful Islam", initials: "MAI", url: "https://seu.edu.bd/employee/profile/MDk5MDA3"},
+            {name: "A. K. M. Ahsanul Haque", initials: "AKMA", url: "https://seu.edu.bd/employee/profile/MDk5MDA5"},
+            {name: "Lubna Yasmin Pinky", initials: "LYP", url: "https://seu.edu.bd/employee/profile/NTMwMTU2"},
+            {name: "Md. Ashiq Mahmood", initials: "MAM", url: "https://seu.edu.bd/employee/profile/ODY4MDcz"},
+            {name: "Khandaker Md. Eusha Bin Hafiz", initials: "KMEBH", url: "https://seu.edu.bd/employee/profile/OTkwMDIx"},
+            {name: "Mirza Fuad Adnan", initials: "MFA", url: "https://seu.edu.bd/employee/profile/OTkwMDI5"},
+            {name: "Prokriti Biswas", initials: "PB", url: "https://seu.edu.bd/employee/profile/OTkwMDIy"},
+            {name: "Dr. murad ahmed", initials: "DMMA", url: "https://newsite.butex.edu.bd/faculty-member/details/107"},
+            {name: "Md. Anowar Hossain", initials: "MAR", url: "https://seu.edu.bd/employee/profile/OTkwMDI3"},
+            {name: "Md. Nurujjaman", initials: "MN", url: "https://seu.edu.bd/employee/profile/MDAxOTMy"},
+            {name: "Dr. Md. Abul Kalam Azad", initials: "AKA", url: "https://seu.edu.bd/employee/profile/MDAxOTM2"},
+            {name: "Md. Asraful Islam", initials: "MDI", url: "https://seu.edu.bd/employee/profile/MDExMTEy"},
+            {name: "Nazmus Sakib", initials: "NS", url: "https://seu.edu.bd/employee/profile/MDExMTA0"},
+            {name: "Md. Mynul Islam", initials: "MMI", url: "https://seu.edu.bd/employee/profile/MDExMTE0"},
+            {name: "Md. Aminur Rahman", initials: "MAR", url: "https://seu.edu.bd/employee/profile/MDExMTE3"},
+            {name: "Rajesh Kumar Deb", initials: "RKD", url: "https://seu.edu.bd/employee/profile/MDAxOTQ2"},
+            {name: "Tahsin Aziz", initials: "TAZ", url: "https://seu.edu.bd/employee/profile/MDAxOTQx"},
+            {name: "Mohammad Ahsan Chowdhury", initials: "MAC", url: "https://seu.edu.bd/employee/profile/MDAxOTQy"},
+            {name: "Tapash Chandra Paul", initials: "TCP", url: "https://seu.edu.bd/employee/profile/MDExMTA2"},
+            {name: "Asaduzzaman Noor", initials: "NOOR", url: "https://seu.edu.bd/employee/profile/MDAxMjY0"},
+            {name: "Md.Fakrul Islam", initials: "MFI", url: "https://seu.edu.bd/employee/profile/MDk5MDAz"},
+            {name: "Ashraful Islam Mridha", initials: "AIM", url: "https://seu.edu.bd/employee/profile/MDA4NTQ0"},
+            {name: "Syeda Tamrina Shahnewaz", initials: "STS", url: "https://seu.edu.bd/employee/profile/MDAxOTM1"},
+            {name: "Shakil Ahmed", initials: "SA", url: "https://seu.edu.bd/employee/profile/MDk5MDA2"},
+            {name: "Atiqur Rahman", initials: "AR", url: "https://seu.edu.bd/employee/profile/MDk5MDA4"},
+            {name: "Umma Habiba", initials: "UH", url: "https://seu.edu.bd/employee/profile/MzY2NTMz"},
+            {name: "Md. Rakib Hasan", initials: "MRH", url: "https://seu.edu.bd/employee/profile/NDk4OTE5"},
+            {name: "Mohammad Marufur Rahman", initials: "MMR", url: "https://seu.edu.bd/employee/profile/MDAxOTQw"},
+            {name: "Mohammad Shamim Waheed", initials: "MSW", url: "https://seu.edu.bd/employee/profile/MDAxOTQ3"},
+            {name: "Anika Rahman", initials: "ANAR", url: "https://seu.edu.bd/employee/profile/MDAxOTQ4"},
+            {name: "Iftekher Mahmud", initials: "IMUD", url: "https://seu.edu.bd/employee/profile/MDAxOTUx"},
+            {name: "S.M Serajul Islam", initials: "SI", url: "https://seu.edu.bd/employee/profile/MDAxOTU3"},
+            {name: "Mosarrof Hossain", initials: "MH", url: "https://seu.edu.bd/employee/profile/MDAxOTUy"},
+            {name: "Al Amin Biswas", initials: "AAB", url: "https://seu.edu.bd/employee/profile/MDExMTAz"},
+            {name: "Md. Samiur Rahman", initials: "MSR", url: "https://seu.edu.bd/employee/profile/MDAxOTUz"},
+            {name: "Pushpita Joardar", initials: "PJ", url: "https://seu.edu.bd/employee/profile/MDExMTA3"},
+            {name: "Nazia Nishat", initials: "NN", url: "https://seu.edu.bd/employee/profile/MDExMTA5"},
+            {name: "Redwanul Mahbub Talukder Zeem", initials: "RMTZ", url: "https://seu.edu.bd/employee/profile/MDExMTEw"},
+            {name: "Nawshad Binta Nizam", initials: "NBN", url: "https://seu.edu.bd/employee/profile/MDExMTEx"},
+            {name: "Md. Zahid  Hossain", initials: "MZH", url: "https://seu.edu.bd/employee/profile/MDExMTEz"},
+            {name: "Kanta Das", initials: "KD", url: "https://seu.edu.bd/employee/profile/MDExMTE4"},
+            {name: "Md. Tanvir Rouf  Shawon", initials: "MTRS", url: "https://seu.edu.bd/employee/profile/MDExMTE1"},
+            {name: "Kazi Shahrier Rafid", initials: "KSRD", url: "https://seu.edu.bd/employee/profile/MDAxNTQ2"},
+            {name: "Md. Miraz Hossain", initials: "MMH", url: "https://seu.edu.bd/employee/profile/MDAxNTQ5"},
+            {name: "Md. Shanian Moed", initials: "MSM", url: "https://seu.edu.bd/employee/profile/MDA4NTQ4"},
+            {name: "Md. Sadman Amir", initials: "MSA", url: "https://seu.edu.bd/employee/profile/MDA4NTQ5"},
+            {name: "Md. Rakibul Islam", initials: "MRI", url: "https://seu.edu.bd/employee/profile/MDAzMDA5"},
+            {name: "Md.Asif Kamal", initials: "MAK", url: "https://seu.edu.bd/employee/profile/MDAxOTQz"},
+            {name: "Probal Roy", initials: "PR", url: "https://seu.edu.bd/employee/profile/MDExMTE5"},
+            {name: "Rajia Sultana", initials: "RS", url: "https://seu.edu.bd/employee/profile/MDExMTIw"},
+            {name: "Prof. Dr. Muhammad Samir Ullah", initials: "MSU", url: "https://seu.edu.bd/employee/profile/MDExMTIx"},
+            {name: "Dr. Mohammad Omar Faruq", initials: "MOF", url: "https://seu.edu.bd/employee/profile/MDExMTIy"},
+            {name: "Md. Bin  Yeamin", initials: "MBY", url: "https://seu.edu.bd/employee/profile/MDExMTIz"},
+            {name: "Dr. Ramit Azad", initials: "RA", url: "https://seu.edu.bd/employee/profile/MDExMTI0"},
+            {name: "Nabila Tasfiha Rahman", initials: "NTR", url: "https://seu.edu.bd/employee/profile/MDExMTI1"},
+            {name: "Md. Mojaammel  Haque", initials: "MMH", url: "https://seu.edu.bd/employee/profile/MDExMTI2"},
+            {name: "Prof. Dr. Shamim Akhter", initials: "SA", url: "https://seu.edu.bd/employee/profile/MDExMTI3"},
+            {name: "Md. Rasul  Khan Hamim", initials: "MRKH", url: "https://seu.edu.bd/employee/profile/MDExMTI4"},
+            {name: "Adnan Amin Siddiquee", initials: "AAS", url: "https://seu.edu.bd/employee/profile/MDExMTI5"},
+            {name: "Md. Shaikh Abrar Kabir", initials: "MSAK", url: "https://seu.edu.bd/employee/profile/MDExMTMw"},
+            {name: "Toiyob Hossain", initials: "TH", url: "https://seu.edu.bd/employee/profile/MDExMTMx"},
+            {name: "Md. Reasad Zaman Chowdhury", initials: "MRZC", url: "https://seu.edu.bd/employee/profile/MDExMTMy"},
+            {name: "Humaira Anzum", initials: "HA", url: "https://seu.edu.bd/employee/profile/MDExMTMz"},
+            {name: "Prof. Dr. Md. Ashrafur Rahman", initials: "MAR", url: "https://seu.edu.bd/employee/profile/MDExMTM1"},
+            {name: "Jannatim Maisha", initials: "JM", url: "https://seu.edu.bd/employee/profile/MDExMTM2"},
+            {name: "Debosre Roy Dristy", initials: "DRD", url: "https://seu.edu.bd/employee/profile/MDYwMDAz"},
+            {name: "Emratul  Jannat Swapna", initials: "EJS", url: "https://seu.edu.bd/employee/profile/MDYwMDA0"},
+            {name: "Md Atiqur Rahman", initials: "MAR", url: "https://seu.edu.bd/employee/profile/MDYwMDA1"},
+            {name: "Sharmin Sultana", initials: "SS", url: "https://seu.edu.bd/employee/profile/MDYwMDA2"},
+            {name: "Farsha Bindu", initials: "FB", url: "https://seu.edu.bd/employee/profile/MDYwMDA4"},
+            {name: "Sajib Biswas Shuvo", initials: "SBS", url: "https://seu.edu.bd/employee/profile/MDYwMDA5"},
+            {name: "Azad Rahman", initials: "AR", url: "https://seu.edu.bd/employee/profile/MDYwMDEw"},
+            {name: "Mahmudul Hasan", initials: "MH", url: "https://seu.edu.bd/employee/profile/MDYwMDEx"},
+            {name: "Md Shafat Bin Islam", initials: "MSBI", url: "https://seu.edu.bd/employee/profile/MDYwMDEy"},
+            {name: "Dr. Amran Hossain", initials: "AH", url: "https://seu.edu.bd/employee/profile/MDAxOTQ0"},
+            {name: "Raihan Tanvir", initials: "RT", url: "https://seu.edu.bd/employee/profile/MDYwMDE1"},
+            {name: "Ashek Seum", initials: "AS", url: "https://seu.edu.bd/employee/profile/MDYwMDE2"},
+            {name: "Dr. Mohammad Shafiul Alam", initials: "MSA", url: "https://seu.edu.bd/employee/profile/MDYwMDE3"},
+            {name: "Golam Rabbany", initials: "GR", url: "https://seu.edu.bd/employee/profile/MDYwMDE4"},
+            {name: "Muntezar Rabbani", initials: "MR", url: "https://seu.edu.bd/employee/profile/MDYwMDE5"},
+            {name: "Rehana Zakia", initials: "RZ", url: "https://seu.edu.bd/employee/profile/MDYwMDIw"},
+            {name: "Md. Tareq Zaman", initials: "MTZ", url: "https://seu.edu.bd/employee/profile/MDYwMDIx"},
+            {name: "Sharika Manjuma Islam", initials: "SMI", url: "https://seu.edu.bd/employee/profile/MDYwMDIy"},
+            {name: "Faysal Rahman", initials: "FOA", url: "https://seu.edu.bd/employee/profile/MDYwMDIz"},
+            {name: "Mrityunjoy Kumar Pandit", initials: "MKP", url: "https://seu.edu.bd/employee/profile/MDYwMDI0"},
+            {name: "Md. Rafiqul  Islam Rafi", initials: "MRIR", url: "https://seu.edu.bd/employee/profile/MDYwMDI2"},
+            {name: "Prof. Dr. Md. Ismail Jabiullah", initials: "MIJ", url: "https://seu.edu.bd/employee/profile/MDYwMDI3"},
+            {name: "Dr. Md. Ashraful Babu", initials: "MAB", url: "https://seu.edu.bd/employee/profile/MDYwMDUy"},
+            {name: "Shahriar Hossain Shanto", initials: "SHS", url: "https://seu.edu.bd/employee/profile/MDYwMDU5"},
+            {name: "Md. Mushfiqur Rahman Fakir", initials: "MMRF", url: "https://seu.edu.bd/employee/profile/MDYwMDU2"},
+            {name: "Sajal Basak Partha", initials: "SBP", url: "https://seu.edu.bd/employee/profile/MDYwMDU3"},
+            {name: "Md. A. M. Reza Khan", initials: "MARK", url: "https://seu.edu.bd/employee/profile/MDYwMDU4"},
+            {name: "Tanvir Ahmed", initials: "TA", url: "https://seu.edu.bd/employee/profile/MDYwMDYw"},
+            {name: "Monirul Hasan", initials: "MH", url: "https://seu.edu.bd/employee/profile/MDAzMDY1"},
+            {name: "Md. Anower Perves", initials: "AP", url: "https://seu.edu.bd/employee/profile/MDk5MDEw"},
+            {name: "Eamir Ahmed", initials: "EA", url: "https://seu.edu.bd/employee/profile/MDk5MDAx"},
+            {name: "Mayukh Mallick", initials: "MAMA", url: "https://seu.edu.bd/employee/profile/MDYwMDcx"},
+            {name: "Ziyan Shirin Raha", initials: "ZAHA", url: "https://seu.edu.bd/employee/profile/MDYwMDcy"},
+            {name: "Sadribul Hassan", initials: "SAAN", url: "https://seu.edu.bd/employee/profile/MDYwMDc0"},
+            {name: "Salim Shadman Ankur", initials: "SAKR", url: "https://seu.edu.bd/employee/profile/MDYwMDc1"},
+            {name: "Faika Fairuj Preotee", initials: "FFP", url: "https://seu.edu.bd/employee/profile/MDYwMDc2"},
+            {name: "Bidyarthi Paul", initials: "BP", url: "https://seu.edu.bd/employee/profile/MDYwMDc4"},
+            {name: "Tahsina Muthaki", initials: "TM", url: "https://seu.edu.bd/employee/profile/MDYwMDc5"},
+            {name: "Md. Ali Akber", initials: "MAA", url: "https://seu.edu.bd/employee/profile/MDYwMDgw"},
+            {name: "Md. Rashedul Islam", initials: "MRI", url: "https://seu.edu.bd/employee/profile/MDYwMDc3"},
+            {name: "Tasfia Tasnim Shimu", initials: "TTS", url: "https://seu.edu.bd/employee/profile/MDYwMDgx"},
+            {name: "Tamjid Rahman", initials: "TR", url: "https://seu.edu.bd/employee/profile/MDYwMDgy"},
+            {name: "Dr. Taposh Kumar Das", initials: "TKD", url: "https://seu.edu.bd/employee/profile/MDYwMDgz"},
+            {name: "Shuvashis Sarker Shuvo", initials: "SSS", url: "https://seu.edu.bd/employee/profile/MDYwMDg1"},
+            {name: "Humira Bentay Mahmud", initials: "HBM", url: "https://seu.edu.bd/employee/profile/MDYwMDg2"},
+            {name: "Md. Monaru Islam", initials: "MMI", url: "https://seu.edu.bd/employee/profile/MDYwMDcz"},
+            {name: "Khondokar Zahin", initials: "KZ", url: "https://seu.edu.bd/employee/profile/MDYwMDg0"},
+            {name: "Avishek Chakraborty", initials: "AC", url: "https://seu.edu.bd/employee/profile/MDYwMDg3"},
+            {name: "Jerin Ahasan Kheya", initials: "JAK", url: "https://seu.edu.bd/employee/profile/MDYwMDky"},
+            {name: "Dr. Taslim Taher", initials: "TT", url: "https://seu.edu.bd/employee/profile/MDYwMDk5"},
+            {name: "Alistair Biswas", initials: "AB", url: "https://seu.edu.bd/employee/profile/MDYwMTAw"},
+            {name: "Rashik Iram Chowdhury", initials: "RIC", url: "https://seu.edu.bd/employee/profile/MDYwMTA0"},
+            {name: "Md. Abdur Rouf Emon", initials: "MARE", url: "https://seu.edu.bd/employee/profile/MDYwMTA1"},
+            {name: "Reasat-E-Noor", initials: "REN", url: "https://seu.edu.bd/employee/profile/MDYwMTA2"},
+            {name: "Md. Rafsan Jani", initials: "MRJ", url: "https://seu.edu.bd/employee/profile/ODcyOTM1"},
+            {name: "Abdullah Saleh", initials: "ALA", url: "https://seu.edu.bd/employee/profile/MDYwMTA3"},
+            {name: "Habib Mohammad", initials: "HM", url: "https://seu.edu.bd/employee/profile/MDYwMTA4"},
+            {name: "Md. Tauhid Bin Iqbal", initials: "MTBI", url: "https://seu.edu.bd/employee/profile/MDYwMTI5"},
+            {name: "Shahriar Parvej", initials: "SP", url: "https://seu.edu.bd/employee/profile/MDYwMTMw"},
+            {name: "Hasnain Ahmed", initials: "HASN", url: "https://seu.edu.bd/employee/profile/MDYwMTMx"},
+            {name: "Sumaiya Salekin", initials: "SuS", url: "https://seu.edu.bd/employee/profile/MDYwMTMy"},
+            {name: "Sarna Sarker", initials: "SrS", url: "https://seu.edu.bd/employee/profile/MDYwMTMz"},
+            {name: "AL Faysal", initials: "AF", url: "https://seu.edu.bd/employee/profile/MDYwMTM0"},
+            {name: "Raihan Amin Rana", initials: "RAR", url: "https://seu.edu.bd/employee/profile/MDYwMTM1"},
+            {name: "Md. Muhiminul Islam", initials: "MMI", url: "https://seu.edu.bd/employee/profile/MDYwMTM2"},
+            {name: "Noor Masrur", initials: "NM", url: "https://seu.edu.bd/employee/profile/MDYwMTM3"},
+            {name: "Noholi Islam Duti", initials: "NID", url: "https://seu.edu.bd/employee/profile/MDYwMTM4"},
+            {name: "Md. Tanzid Mia", initials: "MTM", url: "https://seu.edu.bd/employee/profile/MDYwMTM5"},
+            
+            // From faculty_data (1).txt with manual initials
+            {name: "Prof. Dr. Abdul Kadar Muhammad Masum", initials: "AKMM", url: "https://seu.edu.bd/employee/profile/MDAzNDQz"},
+            {name: "Prof. Dr. Dewan Md. Farid", initials: "DMF", url: "https://seu.edu.bd/employee/profile/MDAzNDQ1"},
+            {name: "Shahriar Manzoor", initials: "SM", url: "https://seu.edu.bd/employee/profile/MDAzMDA2"},
+            {name: "Tanjna Oriana", initials: "TAJO", url: "https://seu.edu.bd/employee/profile/MDAzMDE5"},
+            {name: "Dr. Gazi Zahirul Islam", initials: "GZI", url: "https://seu.edu.bd/employee/profile/MDAzMDI1"},
+            {name: "Dr. Md. Maruf Hassan", initials: "DMHN", url: "https://seu.edu.bd/employee/profile/MDYwMDQ4"},
+            {name: "Dr. Mohammed Ashikur Rahman", initials: "MAKR", url: "https://seu.edu.bd/employee/profile/MDAzNDY5"},
+            {name: "Md. Mijanur Rahman", initials: "MMR", url: "https://seu.edu.bd/employee/profile/MDAzMDk3"},
+            {name: "Mohammad Ashraful Hoque", initials: "AHQ", url: "https://seu.edu.bd/employee/profile/MDAzMDY0"},
+            {name: "Shifat Ahmed", initials: "SAMD", url: "https://seu.edu.bd/employee/profile/MDA4MTQx"},
+            {name: "Mou Mahmood", initials: "MMAH", url: "https://seu.edu.bd/employee/profile/MDAzMDE4"},
+            {name: "Md. Habibullah Belali", initials: "MHB", url: "https://seu.edu.bd/employee/profile/MDAzMDM2"},
+            {name: "Khandaker Mohammad  Mohi Uddin", initials: "KMMU", url: "https://seu.edu.bd/employee/profile/MDAzMDAz"},
+            {name: "Md. Ashiqur Rahman", initials: "MAR", url: "https://seu.edu.bd/employee/profile/MDAzMDEx"},
+            {name: "Roksana Akter", initials: "RA", url: "https://seu.edu.bd/employee/profile/MDAzMDE3"},
+            {name: "Md. Ferdous Bin Hafiz", initials: "FBH", url: "https://seu.edu.bd/employee/profile/MDAzNDI0"},
+            {name: "Mahdin Mahboob", initials: "MDHB", url: "https://seu.edu.bd/employee/profile/MDYwMDI4"},
+            {name: "Md. Shohel Babu", initials: "MSB", url: "https://seu.edu.bd/employee/profile/MDAzMDI2"},
+            {name: "Mohammad Ariful Huq", initials: "MAH", url: "https://seu.edu.bd/employee/profile/MDAzMDk0"},
+            {name: "Mohammad Shohel Rana", initials: "MSR", url: "https://seu.edu.bd/employee/profile/MDAzMDgy"},
+            {name: "Tashreef Muhammad", initials: "TMD", url: "https://seu.edu.bd/employee/profile/MDAzMDI3"},
+            {name: "Mahbub Hasan", initials: "MAHB", url: "https://seu.edu.bd/employee/profile/MDAzMDg1"},
+            {name: "Ishrat Jahan", initials: "IJ", url: "https://seu.edu.bd/employee/profile/MDAzMDky"},
+            {name: "Mahnuma Rahman Rinty", initials: "MRR", url: "https://seu.edu.bd/employee/profile/MDAzMDc0"},
+            {name: "Sakib Mahmud", initials: "SM", url: "https://seu.edu.bd/employee/profile/MDAzMDIw"},
+            {name: "Fatema Zohra Prottyasha", initials: "FZP", url: "https://seu.edu.bd/employee/profile/MDAzMDE2"},
+            {name: "Rifat Ahommed", initials: "RA", url: "https://seu.edu.bd/employee/profile/MDAzMDI4"},
+            {name: "Md. Robiul Islam", initials: "MRI", url: "https://seu.edu.bd/employee/profile/MDAzMDI5"},
+            {name: "Md. Shamim", initials: "MS", url: "https://seu.edu.bd/employee/profile/MDAzMDMx"},
+            {name: "Jahid Hasan Tushar", initials: "JHT", url: "https://seu.edu.bd/employee/profile/MDAzMDMz"},
+            {name: "Md. Asiful Islam Miah", initials: "AMH", url: "https://seu.edu.bd/employee/profile/MDAzMDM3"},
+            {name: "Farhad Uz Zaman", initials: "FUZ", url: "https://seu.edu.bd/employee/profile/MDAxOTM5"},
+            {name: "Md. Alamgir Hossain", initials: "AGN", url: "https://seu.edu.bd/employee/profile/MDAzMDQw"},
+            {name: "Md Alamin", initials: "MALN", url: "https://seu.edu.bd/employee/profile/MDAzMDQy"},
+            {name: "Md. Nazrul Islam", initials: "MNI", url: "https://seu.edu.bd/employee/profile/MDAzMDA4"},
+            {name: "Shimul Dey Katha", initials: "SDK", url: "https://seu.edu.bd/employee/profile/MDAzMDA3"},
+            {name: "Nahid Hasan", initials: "NH", url: "https://seu.edu.bd/employee/profile/MDAzMDA0"},
+            {name: "Muhammed  Yaseen Morshed Adib", initials: "YMA", url: "https://seu.edu.bd/employee/profile/MDAyMDk5"},
+            {name: "Golam Mostafa", initials: "GM", url: "https://seu.edu.bd/employee/profile/MDA3MDE0"},
+            {name: "Mohammad Shahmidul Islam", initials: "MMSI", url: "https://seu.edu.bd/employee/profile/MDAzNDAy"},
+            {name: "Adib Md. Ridwan", initials: "ADMR", url: "https://seu.edu.bd/employee/profile/MDAzNDA1"},
+            {name: "Khondker Rawan Hamid", initials: "KRH", url: "https://seu.edu.bd/employee/profile/MDAzNDA0"},
+            {name: "Tanver Hossain Refat", initials: "TNHR", url: "https://seu.edu.bd/employee/profile/MDAzNDA2"},
+            {name: "Rajon Bardhan", initials: "RB", url: "https://seu.edu.bd/employee/profile/MDAzMDE1"},
+            {name: "Maksuda Rabeya", initials: "MR", url: "https://seu.edu.bd/employee/profile/MDAzMDIx"},
+            {name: "Badhan Das", initials: "BD", url: "https://seu.edu.bd/employee/profile/MDAzMDg4"},
+            {name: "Md. Alamin", initials: "MA", url: "https://seu.edu.bd/employee/profile/MDAzMDc3"},
+            {name: "Yeaseen Arafat", initials: "YA", url: "https://seu.edu.bd/employee/profile/MDAzMDc5"},
+            {name: "Samin Shahriar Tokey", initials: "SST", url: "https://seu.edu.bd/employee/profile/MDAzMDcw"},
+            {name: "Md. Shafiur Raihan Shafi", initials: "MSRS", url: "https://seu.edu.bd/employee/profile/MDAzMDY5"},
+            {name: "Md. Sarowar Hossain Rana", initials: "SHR", url: "https://seu.edu.bd/employee/profile/MDAzNDI1"},
+            {name: "Mahbubul Haq Bhuiyan", initials: "MBH", url: "https://seu.edu.bd/employee/profile/MDExMTA4"},
+            {name: "Maisha Muntaha", initials: "MM", url: "https://seu.edu.bd/employee/profile/MDAzNDQ2"},
+            {name: "Muhaimen Khan", initials: "MK", url: "https://seu.edu.bd/employee/profile/MDAzNDQ3"},
+            {name: "Md. Tamim Khandakar", initials: "MTK", url: "https://seu.edu.bd/employee/profile/MDAzNDQ4"},
+            {name: "Mustavi Ibne Masum", initials: "MIM", url: "https://seu.edu.bd/employee/profile/MDExMTM0"},
+            {name: "Fariha Zahin", initials: "FAZA", url: "https://seu.edu.bd/employee/profile/MDYwMDA3"},
+            {name: "Tanjna Oriana", initials: "TO", url: "https://seu.edu.bd/employee/profile/MDAzNDcx"},
+            {name: "Nishat Anjum Lea", initials: "NAL", url: "https://seu.edu.bd/employee/profile/MDAzNDcy"},
+            {name: "Abid Ahmad", initials: "AA", url: "https://seu.edu.bd/employee/profile/MDAzNDcz"},
+            {name: "Radiathun Tasnia", initials: "RT", url: "https://seu.edu.bd/employee/profile/MDAzNDc1"},
+            {name: "Mustofa  Khalid Ovi", initials: "MUKO", url: "https://seu.edu.bd/employee/profile/MDAzNDc3"}
+        ];
+
+        // Add courses to faculty data
+        facultyData.forEach(faculty => {
+            faculty.courses = facultyCourses[faculty.initials] ? facultyCourses[faculty.initials].join(', ') : '';
+        });
+
+        let filteredData = [...facultyData];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let sortDirection = 1; // 1 for ascending, -1 for descending
+        let sortField = 'name';
+
+        // DOM Elements
+        const elements = {
+            searchInput: document.getElementById('searchInput'),
+            facultyTableBody: document.getElementById('facultyTableBody'),
+            resultCount: document.getElementById('resultCount'),
+            facultyDetails: document.getElementById('facultyDetails'),
+            sortName: document.getElementById('sortName'),
+            prevPage: document.getElementById('prevPage'),
+            nextPage: document.getElementById('nextPage'),
+            pageNumbers: document.getElementById('pageNumbers'),
+            showingFrom: document.getElementById('showingFrom'),
+            showingTo: document.getElementById('showingTo'),
+            totalItems: document.getElementById('totalItems')
+        };
+
+        // Initialize the application
+        function initApp() {
+            renderFacultyTable();
+            setupEventListeners();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Search functionality
+            elements.searchInput.addEventListener('input', () => {
+                currentPage = 1;
+                filterFaculty();
+            });
+
+            // Sort functionality
+            elements.sortName.addEventListener('click', () => {
+                sortField = 'name';
+                sortDirection *= -1;
+                sortFaculty();
+                renderFacultyTable();
+            });
+
+            // Pagination
+            elements.prevPage.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderFacultyTable();
+                }
+            });
+
+            elements.nextPage.addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderFacultyTable();
+                }
+            });
+        }
+
+        // Filter faculty based on search input
+        function filterFaculty() {
+            const searchTerm = elements.searchInput.value.toLowerCase();
+            
+            if (!searchTerm) {
+                filteredData = [...facultyData];
+            } else {
+                filteredData = facultyData.filter(faculty => {
+                    return (
+                        faculty.name.toLowerCase().includes(searchTerm) ||
+                        faculty.initials.toLowerCase().includes(searchTerm) ||
+                        faculty.courses.toLowerCase().includes(searchTerm)
+                    );
+                });
+            }
+            
+            sortFaculty();
+            renderFacultyTable();
+        }
+
+        // Sort faculty data
+        function sortFaculty() {
+            filteredData.sort((a, b) => {
+                if (a[sortField] < b[sortField]) return -1 * sortDirection;
+                if (a[sortField] > b[sortField]) return 1 * sortDirection;
+                return 0;
+            });
+        }
+
+        // Render faculty table
+        function renderFacultyTable() {
+            // Update result count
+            elements.resultCount.textContent = `${filteredData.length} faculty`;
+            elements.totalItems.textContent = filteredData.length;
+            
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+            
+            elements.showingFrom.textContent = startIndex + 1;
+            elements.showingTo.textContent = endIndex;
+            
+            // Clear existing rows
+            elements.facultyTableBody.innerHTML = '';
+            
+            if (paginatedData.length === 0) {
+                elements.facultyTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                            No faculty members found matching your search
+                        </td>
+                    </tr>
+                `;
+            } else {
+                // Add new rows
+                paginatedData.forEach(faculty => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 cursor-pointer';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <span class="text-blue-600 font-medium">${faculty.initials}</span>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">${faculty.name}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                ${faculty.initials}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900 max-w-xs truncate" title="${faculty.courses}">
+                                ${faculty.courses || 'No courses listed'}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="${faculty.url}" class="text-blue-500 hover:text-blue-700" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> Profile
+                            </a>
+                        </td>
+                    `;
+                    
+                    // Add click event to show details
+                    row.addEventListener('click', () => showFacultyDetails(faculty));
+                    
+                    elements.facultyTableBody.appendChild(row);
+                });
+            }
+            
+            // Render pagination
+            renderPagination();
+        }
+
+        // Show faculty details in the sidebar
+        function showFacultyDetails(faculty) {
+            elements.facultyDetails.innerHTML = `
+                <div class="text-center">
+                    <div class="mx-auto h-24 w-24 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                        <span class="text-blue-600 text-2xl font-bold">${faculty.initials}</span>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">${faculty.name}</h3>
+                    <p class="text-sm text-gray-500 mt-1">${faculty.initials}</p>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="text-sm font-medium text-gray-900">Courses</h4>
+                    <div class="mt-2">
+                        ${faculty.courses ? 
+                            faculty.courses.split(', ').map(course => `
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">
+                                    ${course}
+                                </span>
+                            `).join('') : 
+                            '<p class="text-sm text-gray-500">No courses listed</p>'
+                        }
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <a href="${faculty.url}" target="_blank" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                        <i class="fas fa-external-link-alt mr-2"></i> View Full Profile
+                    </a>
+                </div>
+            `;
+        }
+
+        // Render pagination controls
+        function renderPagination() {
+            elements.pageNumbers.innerHTML = '';
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            
+            // Always show first page
+            addPageButton(1);
+            
+            // Show ellipsis if needed
+            if (currentPage > 3) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700';
+                ellipsis.textContent = '...';
+                elements.pageNumbers.appendChild(ellipsis);
+            }
+            
+            // Show current page and neighbors
+            for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+                addPageButton(i);
+            }
+            
+            // Show ellipsis if needed
+            if (currentPage < totalPages - 2) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700';
+                ellipsis.textContent = '...';
+                elements.pageNumbers.appendChild(ellipsis);
+            }
+            
+            // Always show last page if different from first
+            if (totalPages > 1) {
+                addPageButton(totalPages);
+            }
+            
+            // Disable/enable prev/next buttons
+            elements.prevPage.disabled = currentPage === 1;
+            elements.nextPage.disabled = currentPage === totalPages;
+        }
+
+        // Helper function to add a page button
+        function addPageButton(pageNumber) {
+            const button = document.createElement('button');
+            button.className = `relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === pageNumber ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`;
+            button.textContent = pageNumber;
+            button.addEventListener('click', () => {
+                currentPage = pageNumber;
+                renderFacultyTable();
+            });
+            elements.pageNumbers.appendChild(button);
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
